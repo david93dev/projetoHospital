@@ -112,3 +112,23 @@ while menu != 9:
             dados_insert = (cpf_valido, nome_valido, idade_valido, endereco_valido, telefone_valido)
             insertNaTabela(conexao, sql_inserir_paciente, dados_insert)
             print('Paciente cadastrado com sucesso!')
+
+    elif opcao == 2:
+
+        crm = int(input('\nDigite o crm do Médico: '))
+        sql_valida_medico = f"SELECT crm FROM medico WHERE crm = {crm}"
+        medicoExistente = banco_dados1.listarUmValorBancoDados(conexao,sql_valida_medico)
+
+        if medicoExistente:
+            print('\nJá existe um Médico com esse CRM no sistema.')
+
+        else:
+            nome = input('Digite o nome do Médico: ')
+            especialidade = input('Digite a especialidade do Médico: ')
+            telefone = input('Digite o telefone do Médico: ')
+            insert_medico = (crm,nome,especialidade,telefone)
+
+            sql_inserir_medico = "INSERT INTO medico (crm, nome, especialidade,telefone) VALUES (%s, %s, %s, %s)"
+            banco_dados1.insertNaTabela(conexao, sql_inserir_medico, insert_medico)
+            print('\nMédico adicionado com sucesso!')
+
