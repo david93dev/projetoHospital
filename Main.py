@@ -113,22 +113,40 @@ while menu != 9:
             insertNaTabela(conexao, sql_inserir_paciente, dados_insert)
             print('Paciente cadastrado com sucesso!')
 
-    elif opcao == 2:
+    elif menu == 2:
 
-        crm = int(input('\nDigite o crm do Médico: '))
-        sql_valida_medico = f"SELECT crm FROM medico WHERE crm = {crm}"
-        medicoExistente = banco_dados1.listarUmValorBancoDados(conexao,sql_valida_medico)
+        print('''
+                    ╔══════════════════════════════╗
+                    ║       Cadastro Médico        ║
+                    ╚══════════════════════════════╝ 
+                            ''')
 
-        if medicoExistente:
-            print('\nJá existe um Médico com esse CRM no sistema.')
+        crm = input("CRM do médico: ")
+        crm_valido = valida_cadastro(crm)
+
+        nome = input("Nome do médico: ")
+        nome_valido = valida_cadastro(nome)
+
+        especialidade = input("Especialidade do médico: ")
+        especialidade_valida = valida_cadastro(especialidade)
+
+        telefone = input("Telefone do médico: ")
+        telefone_valido = valida_cadastro(telefone)
+
+        cursor = conexao.cursor()
+
+        query = "SELECT * FROM medico WHERE crm = %s"
+        cursor.execute(query, (crm_valido,))
+        resultado = cursor.fetchone()
+
+        if resultado:
+            print('Operação falhou: CRM já cadastrado!')
 
         else:
-            nome = input('Digite o nome do Médico: ')
-            especialidade = input('Digite a especialidade do Médico: ')
-            telefone = input('Digite o telefone do Médico: ')
-            insert_medico = (crm,nome,especialidade,telefone)
+            sql_inserir_medico = "INSERT INTO Medico (crm, nome, especialidade, telefone) VALUES (%s, %s, %s, %s)"
+            dados_insert = (crm_valido, nome_valido, especialidade_valida, telefone_valido)
+            insertNaTabela(conexao, sql_inserir_medico, dados_insert)
+            print('Médico cadastrado com sucesso!')
 
-            sql_inserir_medico = "INSERT INTO medico (crm, nome, especialidade,telefone) VALUES (%s, %s, %s, %s)"
-            banco_dados1.insertNaTabela(conexao, sql_inserir_medico, insert_medico)
-            print('\nMédico adicionado com sucesso!')
+
 
