@@ -178,38 +178,170 @@ while menu != 9:
                     ╚══════════════════════════════╝ 
                     ''')
 
-    cursor = conexao.cursor()
-    crm_pesquisado = input("Digite o crm do médico que deseja pesquisar: ")
+        cursor = conexao.cursor()
+        crm_pesquisado = input("Digite o crm do médico que deseja pesquisar: ")
 
-    query = "SELECT * FROM medico WHERE crm = %s"
-    cursor.execute(query, (crm_pesquisado,))
-    resultado = cursor.fetchone()
+        query = "SELECT * FROM medico WHERE crm = %s"
+        cursor.execute(query, (crm_pesquisado,))
+        resultado = cursor.fetchone()
 
-    if resultado:
-        print(
-            f'CRM: {resultado[0]}\nNome: {resultado[1]}\nEspecialidade: {resultado[2]}\nTelefone: {resultado[3]}')
-    else:
-        print("Nenhum médico encontrado com esse CRM.")
+        if resultado:
+            print(
+                f'CRM: {resultado[0]}\nNome: {resultado[1]}\nEspecialidade: {resultado[2]}\nTelefone: {resultado[3]}')
+        else:
+            print("Nenhum médico encontrado com esse CRM.")
 
     elif menu == 5:
 
         print('''
+                        ╔══════════════════════════════╗
+                        ║       Excluir Paciente       ║
+                        ╚══════════════════════════════╝ 
+                                ''')
+        cursor = conexao.cursor()
+        cpf_excluir = input("Digite o CPF do paciente que deseja excluir: ")
+
+        query = "SELECT cpf FROM paciente WHERE cpf = %s"
+        cursor.execute(query, (cpf_excluir,))
+        resultado = cursor.fetchone()
+
+        if not resultado:
+                print(f"Nenhum paciente encontrado com CPF: {cpf_excluir}.")
+
+        else:
+                delete_query = "DELETE FROM paciente WHERE cpf = %s"
+                cursor.execute(delete_query, (cpf_excluir,))
+                conexao.commit()
+                print(f"Paciente excluído com sucesso.")
+
+    elif menu == 6:
+
+        print('''
                     ╔══════════════════════════════╗
-                    ║       Excluir Paciente       ║
+                    ║       Excluir Médico         ║
                     ╚══════════════════════════════╝ 
-                            ''')
-    cursor = conexao.cursor()
-    cpf_excluir = input("Digite o CPF do paciente que deseja excluir: ")
+                    ''')
 
-    query = "SELECT cpf FROM paciente WHERE cpf = %s"
-    cursor.execute(query, (cpf_excluir,))
-    resultado = cursor.fetchone()
+        cursor = conexao.cursor()
+        crm_excluir = input("Digite o CRM do médico que deseja excluir: ")
 
-    if not resultado:
-        print(f"Nenhum paciente encontrado com CPF: {cpf_excluir}.")
+        query = "SELECT crm FROM medico WHERE crm = %s"
+        cursor.execute(query, (crm_excluir,))
+        resultado = cursor.fetchone()
 
-    else:
-        delete_query = "DELETE FROM paciente WHERE cpf = %s"
-        cursor.execute(delete_query, (cpf_excluir,))
-        conexao.commit()
-        print(f"Paciente excluído com sucesso.")
+        if not resultado:
+            print(f"Nenhum médico encontrado com esse CRM: {crm_excluir}.")
+
+        else:
+            delete_query = "DELETE FROM medico WHERE crm = %s"
+            cursor.execute(delete_query, (crm_excluir,))
+            conexao.commit()
+            print(f"Médico excluído com sucesso.")
+
+    elif menu == 7:
+        menu2 = 0
+        while menu2 != 4:
+            try:
+                menu2 = int(input('''
+                    ╔═══════Menu Agendamento═══════╗
+                    ║   1. Agendar consulta        ║
+                    ║   2. Listar consultas        ║
+                    ║   3. Cancelar agendamento    ║
+                    ║   4. Voltar                  ║
+                    ╚══════════════════════════════╝ 
+                        Digite o número da opção: '''))
+
+            except ValueError:
+                print('Tente novamente')
+
+            if menu2 == 1:
+
+                cpf = input("CPF do paciente: ")
+                cpf_valido = valida_cadastro(cpf)
+
+                consulta = input("O que deseja agendar: ")
+                consulta_valido = valida_cadastro(consulta)
+
+                data = input("Digite a data do agendamento (DD-MM-YYYY): ")
+                data_valido = valida_cadastro(data)
+
+                cursor = conexao.cursor()
+
+                query = "SELECT * FROM paciente WHERE cpf = %s"
+                cursor.execute(query, (cpf_valido,))
+                resultado = cursor.fetchone()
+
+                
+
+                if resultado:
+                    nome = resultado[1]
+
+                    sql_inserir_agendamento = "INSERT INTO agendarconsulta (cpf, nomepaciente, consulta, datas) VALUES (%s, %s, %s, %s)"
+                    dados_insert = (cpf_valido, nome, consulta_valido, data_valido)
+                    insertNaTabela(conexao, sql_inserir_agendamento, dados_insert)
+                    print("Consulta agendada com sucesso!")
+
+                else:
+                    print(f"Nenhum paciente encontrado com CPF: {cpf_valido}.")
+                    print("Volte ao menu principal e realize seu cadastro!")
+
+
+            elif menu2 == 2:
+
+                cursor = conexao.cursor()
+
+                query = "SELECT * FROM agendarconsulta"
+                cursor.execute(query)
+                resultado = cursor.fetchall()
+
+                if not resultado:
+                    print("Nenhuma consulta encontrada.")
+
+                else:
+                    for row in resultado:
+                        print(
+                            f"ID: {row[0]}, CPF: {row[1]}, Nome: {row[2]}, Consulta: {row[3]}, Data: {row[4]}")
+                        print(
+                            "--------------------------------------------------------------------------------")
+
+            elif menu2 == 3:
+
+                cursor = conexao.cursor()
+
+                query = "SELECT * FROM agendarconsulta"
+                cursor.execute(query)
+                resultado = cursor.fetchall()
+
+                if not resultado:
+                    print("Nenhuma consulta encontrada.")
+
+                else:
+                    for row in resultado:
+                        print(
+                            f"ID: {row[0]}, CPF: {row[1]}, Nome: {row[2]}, Consulta: {row[3]}, Data: {row[4]}")
+                        print(
+                            "--------------------------------------------------------------------------------")
+
+                    cursor = conexao.cursor()
+                    id_excluir = input("Digite o Código ou ID da consulta agendada que deseja excluir: ")
+
+                    query = "SELECT id FROM agendarconsulta WHERE id = %s"
+                    cursor.execute(query, (id_excluir,))
+                    resultado = cursor.fetchone()
+
+                    if not resultado:
+                        print(f"Nenhum agendamento encontrado com essa ID: {id_excluir}.")
+
+                    else:
+                        delete_query = "DELETE FROM agendarconsulta WHERE id = %s"
+                        cursor.execute(delete_query, (id_excluir,))
+                        conexao.commit()
+                        print(f"Agendamento excluído com sucesso.")
+
+            elif menu2 == 4:
+                print(menu)
+
+            else:
+                print(f"Opção invalida!.")
+
+
