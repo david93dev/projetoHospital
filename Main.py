@@ -150,3 +150,24 @@ while menu != 9:
 
 
 
+    elif menu == 3:
+
+        print('''
+                    ╔══════════════════════════════╗
+                    ║      Pesquisa Paciente                                         ║
+                    ╚══════════════════════════════╝ 
+                    ''')
+
+        cursor = conexao.cursor()
+        cpf_pesquisado = input("Digite o CPF do paciente que deseja pesquisar: ")
+
+        query = "SELECT * FROM paciente WHERE cpf = %s"
+        cursor.execute(query, (cpf_pesquisado,))
+        resultado = cursor.fetchone()
+
+        if resultado:
+            print(
+                f'CPF: {resultado[0]}\nNome: {resultado[1]}\nIdade: {resultado[2]}\nEndereço: {resultado[3]}\nTelefone: {resultado[4]}')
+        else:
+            print(f'Nenhum paciente encontrado com esse CPF: {cpf_pesquisado}.')
+
