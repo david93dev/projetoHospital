@@ -1,9 +1,9 @@
-from projetoHospital.hospitalarbd import *
+from hospitalarbd import *
 from util import *
 
 endereco = "localhost"
 usuario = "root"
-senha = "David#2010"
+senha = "981276"
 
 conexao = criarConexaoInicial(endereco, usuario, senha)
 
@@ -34,7 +34,8 @@ sql_criar_tabela_agendar_consulta = """
             CPF VARCHAR(15) NOT NULL,
             NomePaciente VARCHAR(50) NOT NULL,
             Consulta VARCHAR(100) NOT NULL,
-            Datas VARCHAR(20) NOT NULL
+            Datas VARCHAR(20) NOT NULL,
+            FOREIGN KEY (CPF) REFERENCES Paciente(CPF)
         );
     """
 
@@ -46,7 +47,9 @@ sql_criar_tabela_agendar_procedimento_medico = """
             CPF VARCHAR(15) NOT NULL,
             NomePaciente VARCHAR(50) NOT NULL,
             Procedimento VARCHAR(100) NOT NULL,
-            Datas VARCHAR(20) NOT NULL
+            Datas VARCHAR(20) NOT NULL,
+            FOREIGN KEY (CRM) REFERENCES Medico(CRM),
+            FOREIGN KEY (CPF) REFERENCES Paciente(CPF)
         );
     """
 
@@ -85,33 +88,38 @@ while menu != 9:
 
         cpf = input("CPF do paciente: ")
         cpf_valido = valida_cadastro(cpf)
+        cpf_validado = valida_cpf(cpf_valido)
 
-        nome = input("Nome do paciente: ")
-        nome_valido = valida_cadastro(nome)
+        if cpf_validado:
 
-        idade = input("Idade do paciente: ")
-        idade_valido = valida_cadastro(idade)
+            nome = input("Nome do paciente: ")
+            nome_valido = valida_cadastro(nome)
 
-        endereco = input("Endereço do paciente: ")
-        endereco_valido = valida_cadastro(endereco)
+            idade = input("Idade do paciente: ")
+            idade_valido = valida_cadastro(idade)
 
-        telefone = input("Telefone do paciente: ")
-        telefone_valido = valida_cadastro(telefone)
+            endereco = input("Endereço do paciente: ")
+            endereco_valido = valida_cadastro(endereco)
 
-        cursor = conexao.cursor()
+            telefone = input("Telefone do paciente: ")
+            telefone_valido = valida_cadastro(telefone)
 
-        query = "SELECT * FROM paciente WHERE cpf = %s"
-        cursor.execute(query, (cpf_valido,))
-        resultado = cursor.fetchone()
+            cursor = conexao.cursor()
 
-        if resultado:
-            print('Operação falhou: CPF já cadastrado!')
+            query = "SELECT * FROM paciente WHERE cpf = %s"
+            cursor.execute(query, (cpf_valido,))
+            resultado = cursor.fetchone()
 
+            if resultado:
+                print('Operação falhou: CPF já cadastrado!')
+
+            else:
+                sql_inserir_paciente = "INSERT INTO Paciente (cpf, nome, idade, endereco, telefone) VALUES (%s, %s, %s, %s, %s)"
+                dados_insert = (cpf_valido, nome_valido, idade_valido, endereco_valido, telefone_valido)
+                insertNaTabela(conexao, sql_inserir_paciente, dados_insert)
+                print('Paciente cadastrado com sucesso!')
         else:
-            sql_inserir_paciente = "INSERT INTO Paciente (cpf, nome, idade, endereco, telefone) VALUES (%s, %s, %s, %s, %s)"
-            dados_insert = (cpf_valido, nome_valido, idade_valido, endereco_valido, telefone_valido)
-            insertNaTabela(conexao, sql_inserir_paciente, dados_insert)
-            print('Paciente cadastrado com sucesso!')
+            print('CPF inválido! Informe o cpf da seguinte forma: 000.000.000-00')
 
     elif menu == 2:
 
@@ -258,32 +266,38 @@ while menu != 9:
 
                 cpf = input("CPF do paciente: ")
                 cpf_valido = valida_cadastro(cpf)
+                cpf_validado = valida_cpf(cpf_valido)
 
-                consulta = input("O que deseja agendar: ")
-                consulta_valido = valida_cadastro(consulta)
-
-                data = input("Digite a data do agendamento (DD-MM-YYYY): ")
-                data_valido = valida_cadastro(data)
-
-                cursor = conexao.cursor()
-
-                query = "SELECT * FROM paciente WHERE cpf = %s"
-                cursor.execute(query, (cpf_valido,))
-                resultado = cursor.fetchone()
-
+                if cpf_validado:
                 
+                    consulta = input("O que deseja agendar: ")
+                    consulta_valido = valida_cadastro(consulta)
 
-                if resultado:
-                    nome = resultado[1]
+                    data = input("Digite a data do agendamento (DD-MM-YYYY): ")
+                    data_valido = valida_cadastro(data)
 
-                    sql_inserir_agendamento = "INSERT INTO agendarconsulta (cpf, nomepaciente, consulta, datas) VALUES (%s, %s, %s, %s)"
-                    dados_insert = (cpf_valido, nome, consulta_valido, data_valido)
-                    insertNaTabela(conexao, sql_inserir_agendamento, dados_insert)
-                    print("Consulta agendada com sucesso!")
+                    cursor = conexao.cursor()
+
+                    query = "SELECT * FROM paciente WHERE cpf = %s"
+                    cursor.execute(query, (cpf_valido,))
+                    resultado = cursor.fetchone()
+
+                    
+
+                    if resultado:
+                        nome = resultado[1]
+
+                        sql_inserir_agendamento = "INSERT INTO agendarconsulta (cpf, nomepaciente, consulta, datas) VALUES (%s, %s, %s, %s)"
+                        dados_insert = (cpf_valido, nome, consulta_valido, data_valido)
+                        insertNaTabela(conexao, sql_inserir_agendamento, dados_insert)
+                        print("Consulta agendada com sucesso!")
+
+                    else:
+                        print(f"Nenhum paciente encontrado com CPF: {cpf_valido}.")
+                        print("Volte ao menu principal e realize seu cadastro!")
 
                 else:
-                    print(f"Nenhum paciente encontrado com CPF: {cpf_valido}.")
-                    print("Volte ao menu principal e realize seu cadastro!")
+                    print('CPF inválido! Informe o cpf da seguinte forma: 000.000.000-00')
 
 
             elif menu2 == 2:
@@ -298,9 +312,10 @@ while menu != 9:
                     print("Nenhuma consulta encontrada.")
 
                 else:
+                    print('\nCONSULTAS AGENDADAS:\n\n')
                     for row in resultado:
                         print(
-                            f"ID: {row[0]}, CPF: {row[1]}, Nome: {row[2]}, Consulta: {row[3]}, Data: {row[4]}")
+                            f"ID: {row[0]} \nCPF: {row[1]} \nNome: {row[2]} \nConsulta: {row[3]} \nData: {row[4]}")
                         print(
                             "--------------------------------------------------------------------------------")
 
@@ -318,7 +333,7 @@ while menu != 9:
                 else:
                     for row in resultado:
                         print(
-                            f"ID: {row[0]}, CPF: {row[1]}, Nome: {row[2]}, Consulta: {row[3]}, Data: {row[4]}")
+                            f"ID: {row[0]} \nCPF: {row[1]} \nNome: {row[2]} \nConsulta: {row[3]} \nData: {row[4]}")
                         print(
                             "--------------------------------------------------------------------------------")
 
@@ -338,11 +353,8 @@ while menu != 9:
                         conexao.commit()
                         print(f"Agendamento excluído com sucesso.")
 
-            elif menu2 == 4:
-                print(menu)
-
-            else:
-                print(f"Opção invalida!.")
+            elif menu2 != 4:
+                print("Opção invalida!.")
 
     elif menu == 8:
         menu3 = 0
@@ -366,37 +378,43 @@ while menu != 9:
 
                 cpf = input("CPF do paciente: ")
                 cpf_valido = valida_cadastro(cpf)
+                cpf_validado = valida_cpf(cpf_valido)
 
-                procedimento = input("Registre o procedimento médico realizado: ")
-                procedimento_valido = valida_cadastro(procedimento)
+                if cpf_validado:
 
-                data = input("Digite a data desse procedimento (DD-MM-YYYY): ")
-                data_valido = valida_cadastro(data)
+                    procedimento = input("Registre o procedimento médico realizado: ")
+                    procedimento_valido = valida_cadastro(procedimento)
 
-                cursor = conexao.cursor()
+                    data = input("Digite a data desse procedimento (DD-MM-YYYY): ")
+                    data_valido = valida_cadastro(data)
 
-                query = "SELECT * FROM medico WHERE crm = %s"
-                cursor.execute(query, (crm_valido,))
-                resultado_medico = cursor.fetchone()
+                    cursor = conexao.cursor()
 
-
-                query = "SELECT * FROM paciente WHERE cpf = %s"
-                cursor.execute(query, (cpf_valido,))
-                resultado_paciente = cursor.fetchone()
+                    query = "SELECT * FROM medico WHERE crm = %s"
+                    cursor.execute(query, (crm_valido,))
+                    resultado_medico = cursor.fetchone()
 
 
-                if resultado_medico and resultado_paciente:
-                    nome_medico = resultado_medico[1]
-                    nome_paciente = resultado_paciente[1]
+                    query = "SELECT * FROM paciente WHERE cpf = %s"
+                    cursor.execute(query, (cpf_valido,))
+                    resultado_paciente = cursor.fetchone()
 
-                    sql_inserir_procedimentos = "INSERT INTO procedimentos (crm, nomemedico, cpf, nomepaciente, procedimento, datas) VALUES (%s, %s, %s, %s, %s, %s)"
-                    dados_insert = (crm_valido, nome_medico, cpf_valido, nome_paciente, procedimento_valido, data_valido)
-                    insertNaTabela(conexao, sql_inserir_procedimentos, dados_insert)
-                    print("Cadastrado realizado com sucesso!")
+
+                    if resultado_medico and resultado_paciente:
+                        nome_medico = resultado_medico[1]
+                        nome_paciente = resultado_paciente[1]
+
+                        sql_inserir_procedimentos = "INSERT INTO procedimentos (crm, nomemedico, cpf, nomepaciente, procedimento, datas) VALUES (%s, %s, %s, %s, %s, %s)"
+                        dados_insert = (crm_valido, nome_medico, cpf_valido, nome_paciente, procedimento_valido, data_valido)
+                        insertNaTabela(conexao, sql_inserir_procedimentos, dados_insert)
+                        print("Cadastrado realizado com sucesso!")
+
+                    else:
+                        print(f"Paciente ou médico não cadastrados")
+                        print("Volte ao menu principal e realize os cadastros!")
 
                 else:
-                    print(f"Paciente ou médico não cadastrados")
-                    print("Volte ao menu principal e realize os cadastros!")
+                    print('CPF inválido! Informe o cpf da seguinte forma: 000.000.000-00')
 
             elif menu3 == 2:
                 cursor = conexao.cursor()
@@ -409,15 +427,14 @@ while menu != 9:
                     print("Nenhuma consulta encontrada.")
 
                 else:
+                    print('\nPROCEDIMENTOS REALIZADOS:\n\n')
                     for row in resultado:
                         print(
-                            f"ID: {row[0]}, CRM: {row[1]}, Nome do médico: {row[2]}, CPF: {row[3]}, Nome do paciente: {row[4]}, Procediemnto: {row[5]}, Data: {row[6]}")
+                            f"ID: {row[0]} \nCRM: {row[1]} \nNome do médico: {row[2]} \nCPF: {row[3]} \nNome do paciente: {row[4]} \nProcediemnto: {row[5]} \nData: {row[6]}")
                         print(
                             "--------------------------------------------------------------------------------")
-            elif menu3 == 3:
-                print(menu)
-            else:
-                print(f"Opção invalida!.")
+            elif menu3 != 3:
+                print("Opção invalida!.")
 
     elif menu == 9:
         print("Saindo do sistema...")
