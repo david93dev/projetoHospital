@@ -148,13 +148,11 @@ while menu != 9:
             insertNaTabela(conexao, sql_inserir_medico, dados_insert)
             print('Médico cadastrado com sucesso!')
 
-
-
     elif menu == 3:
 
         print('''
                     ╔══════════════════════════════╗
-                    ║      Pesquisa Paciente                                         ║
+                    ║      Pesquisa Paciente       ║
                     ╚══════════════════════════════╝ 
                     ''')
 
