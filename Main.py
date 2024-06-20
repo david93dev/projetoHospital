@@ -169,25 +169,27 @@ while menu != 9:
         else:
             print(f'Nenhum paciente encontrado com esse CPF: {cpf_pesquisado}.')
 
-            print('''
+
+    elif menu == 4:
+
+        print('''
                     ╔══════════════════════════════╗
                     ║       Pesquisa Médico        ║
                     ╚══════════════════════════════╝ 
                     ''')
 
-        cursor = conexao.cursor()
-        crm_pesquisado = input("Digite o crm do médico que deseja pesquisar: ")
+    cursor = conexao.cursor()
+    crm_pesquisado = input("Digite o crm do médico que deseja pesquisar: ")
 
-        query = "SELECT * FROM medico WHERE crm = %s"
-        cursor.execute(query, (crm_pesquisado,))
-        resultado = cursor.fetchone()
+    query = "SELECT * FROM medico WHERE crm = %s"
+    cursor.execute(query, (crm_pesquisado,))
+    resultado = cursor.fetchone()
 
-        if resultado:
-            print(
-                f'CRM: {resultado[0]}\nNome: {resultado[1]}\nEspecialidade: {resultado[2]}\nTelefone: {resultado[3]}')
-        else:
-            print("Nenhum médico encontrado com esse CRM.")
-
+    if resultado:
+        print(
+            f'CRM: {resultado[0]}\nNome: {resultado[1]}\nEspecialidade: {resultado[2]}\nTelefone: {resultado[3]}')
+    else:
+        print("Nenhum médico encontrado com esse CRM.")
 
     elif menu == 5:
 
@@ -196,20 +198,18 @@ while menu != 9:
                     ║       Excluir Paciente       ║
                     ╚══════════════════════════════╝ 
                             ''')
-        cursor = conexao.cursor()
-        cpf_excluir = input("Digite o CPF do paciente que deseja excluir: ")
+    cursor = conexao.cursor()
+    cpf_excluir = input("Digite o CPF do paciente que deseja excluir: ")
 
-        query = "SELECT cpf FROM paciente WHERE cpf = %s"
-        cursor.execute(query, (cpf_excluir,))
-        resultado = cursor.fetchone()
+    query = "SELECT cpf FROM paciente WHERE cpf = %s"
+    cursor.execute(query, (cpf_excluir,))
+    resultado = cursor.fetchone()
 
-        if not resultado:
-            print(f"Nenhum paciente encontrado com CPF: {cpf_excluir}.")
+    if not resultado:
+        print(f"Nenhum paciente encontrado com CPF: {cpf_excluir}.")
 
-        else:
-            delete_query = "DELETE FROM paciente WHERE cpf = %s"
-            cursor.execute(delete_query, (cpf_excluir,))
-            conexao.commit()
-            print(f"Paciente excluído com sucesso.")
-
-
+    else:
+        delete_query = "DELETE FROM paciente WHERE cpf = %s"
+        cursor.execute(delete_query, (cpf_excluir,))
+        conexao.commit()
+        print(f"Paciente excluído com sucesso.")
