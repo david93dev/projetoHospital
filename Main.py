@@ -202,9 +202,9 @@ while menu != 9:
     elif menu == 5:
 
         print('''
-                        ╔══════════════════════════════╗
-                        ║       Excluir Paciente       ║
-                        ╚══════════════════════════════╝ 
+                    ╔══════════════════════════════╗
+                    ║       Excluir Paciente       ║
+                    ╚══════════════════════════════╝ 
                                 ''')
         cursor = conexao.cursor()
         cpf_excluir = input("Digite o CPF do paciente que deseja excluir: ")
