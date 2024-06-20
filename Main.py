@@ -344,4 +344,87 @@ while menu != 9:
             else:
                 print(f"Opção invalida!.")
 
+    elif menu == 8:
+        menu3 = 0
+        while menu3 != 3:
+            try:
+                menu3 = int(input('''
+                    ╔═══════Menu Procedimentos Médico══════╗
+                    ║   1. Adicionar Procedimento Médico   ║
+                    ║   2. Pesquisar Procedimento Médico   ║
+                    ║   3. Voltar                          ║
+                    ╚══════════════════════════════════════╝ 
+                        Digite o número da opção: '''))
 
+            except ValueError:
+                print('Tente novamente!')
+
+            if menu3 == 1:
+
+                crm = input("Digite seu CRM: ")
+                crm_valido = valida_cadastro(crm)
+
+                cpf = input("CPF do paciente: ")
+                cpf_valido = valida_cadastro(cpf)
+
+                procedimento = input("Registre o procedimento médico realizado: ")
+                procedimento_valido = valida_cadastro(procedimento)
+
+                data = input("Digite a data desse procedimento (DD-MM-YYYY): ")
+                data_valido = valida_cadastro(data)
+
+                cursor = conexao.cursor()
+
+                query = "SELECT * FROM medico WHERE crm = %s"
+                cursor.execute(query, (crm_valido,))
+                resultado_medico = cursor.fetchone()
+
+
+                query = "SELECT * FROM paciente WHERE cpf = %s"
+                cursor.execute(query, (cpf_valido,))
+                resultado_paciente = cursor.fetchone()
+
+
+                if resultado_medico and resultado_paciente:
+                    nome_medico = resultado_medico[1]
+                    nome_paciente = resultado_paciente[1]
+
+                    sql_inserir_procedimentos = "INSERT INTO procedimentos (crm, nomemedico, cpf, nomepaciente, procedimento, datas) VALUES (%s, %s, %s, %s, %s, %s)"
+                    dados_insert = (crm_valido, nome_medico, cpf_valido, nome_paciente, procedimento_valido, data_valido)
+                    insertNaTabela(conexao, sql_inserir_procedimentos, dados_insert)
+                    print("Cadastrado realizado com sucesso!")
+
+                else:
+                    print(f"Paciente ou médico não cadastrados")
+                    print("Volte ao menu principal e realize os cadastros!")
+
+            elif menu3 == 2:
+                cursor = conexao.cursor()
+
+                query = "SELECT * FROM procedimentos"
+                cursor.execute(query)
+                resultado = cursor.fetchall()
+
+                if not resultado:
+                    print("Nenhuma consulta encontrada.")
+
+                else:
+                    for row in resultado:
+                        print(
+                            f"ID: {row[0]}, CRM: {row[1]}, Nome do médico: {row[2]}, CPF: {row[3]}, Nome do paciente: {row[4]}, Procediemnto: {row[5]}, Data: {row[6]}")
+                        print(
+                            "--------------------------------------------------------------------------------")
+            elif menu3 == 3:
+                print(menu)
+            else:
+                print(f"Opção invalida!.")
+
+    elif menu == 9:
+        print("Saindo do sistema...")
+        print("Obrigado!")
+
+    else:
+        print('Opção invalida!')
+
+
+encerrarBancoDados(conexao)
